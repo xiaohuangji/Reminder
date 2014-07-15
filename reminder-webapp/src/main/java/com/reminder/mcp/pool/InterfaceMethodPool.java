@@ -1,8 +1,7 @@
 package com.reminder.mcp.pool;
 
+import com.reminder.mcp.log.LoggerInformation;
 import com.reminder.mcp.model.ClassHandler;
-import com.reminder.util.log.LoggerInformation;
-import com.reminder.util.scan.InterfaceScan;
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
@@ -20,7 +19,9 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  */
 public class InterfaceMethodPool implements ApplicationContextAware,InitializingBean  {
-	private static final Logger logger = Logger.getLogger(InterfaceMethodPool.class);
+
+    private static final Logger logger=Logger.getLogger(InterfaceMethodPool.class);
+
 	private static final String DEFAULT_MCP_PACKAGE = "com.reminder.api";
 	private ApplicationContext context;
 	private List<String> mcpPackages = new ArrayList<String>();
@@ -61,7 +62,6 @@ public class InterfaceMethodPool implements ApplicationContextAware,Initializing
 	public void setMcpPackages(List<String> mcpPackages) {
 		this.mcpPackages = mcpPackages;
 	}
-
 
 	public void afterPropertiesSet() throws Exception {
 		init();

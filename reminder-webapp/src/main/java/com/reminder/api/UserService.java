@@ -1,5 +1,6 @@
 package com.reminder.api;
 
+import com.reminder.mcp.annotation.RestMethod;
 import com.reminder.model.UserInfo;
 
 /**
@@ -12,6 +13,7 @@ public interface UserService {
      * @param _userId
      * @return
      */
+    @RestMethod
     public UserInfo getUserInfo(int _userId);
 
     /**
@@ -20,6 +22,14 @@ public interface UserService {
      * @param avatar
      * @return
      */
+    @RestMethod
     public int changeUserInfo(int _userId,String avatar,int birthday,int gender);
+
+    /**
+     * 通过
+     * @param cellphone
+     * @return
+     */
+    public UserInfo getUserInfoByMobile(String cellphone);
 
 }

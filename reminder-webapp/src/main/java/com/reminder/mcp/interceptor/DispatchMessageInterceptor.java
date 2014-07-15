@@ -1,14 +1,16 @@
 package com.reminder.mcp.interceptor;
 
+import com.reminder.api.ApiSigService;
 import com.reminder.api.PassportService;
 import com.reminder.mcp.model.*;
 import com.reminder.mcp.pool.InterfaceMethodPool;
 import com.reminder.model.UserPassport;
-import com.reminder.util.log.LoggerInformation;
+import com.reminder.mcp.log.LoggerInformation;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.perf4j.commonslog.CommonsLogStopWatch;
+
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
@@ -28,13 +30,14 @@ import static com.reminder.mcp.model.DispatchInterceptorConstant.*;
  * 
  */
 public class DispatchMessageInterceptor extends HandlerInterceptorAdapter {
-	private static final Logger logger = Logger.getLogger(DispatchMessageInterceptor.class);
-	//private static final Logger stastisticLogger = Logger.getLogger("com.dajie.mobile.mcp.log.LoggerStatistics");
-	//private static final Logger accessLogger = Logger.getLogger("com.dajie.mobile.mcp.interceptor.DispatchMessageInterceptor.access");
-	
+
+    private static final Logger logger= Logger.getLogger(DispatchMessageInterceptor.class);
+
 	private InterfaceMethodPool interfacePool;
 
 	private PassportService passportService;
+
+    private ApiSigService apiSigService;
 	
 	public static final int NO_TICKET = 1;
 	
@@ -300,10 +303,10 @@ public class DispatchMessageInterceptor extends HandlerInterceptorAdapter {
 
 		String newSig = DigestUtils.md5Hex(sig+cmn.getClassName()+cmn.getMethodName()).toLowerCase();
 
-		Integer sigValue = passportService.getSig(newSig);
+		Integer sigValue = apiSigService.getSig(newSig);
 
 		if(sigValue == null){
-			passportService.addSig(newSig, 1);
+            apiSigService.addSig(newSig, 1);
 			return true;
 		}
 
@@ -313,7 +316,7 @@ public class DispatchMessageInterceptor extends HandlerInterceptorAdapter {
 			return false;
 
 		}else{//这次请求是新的
-			passportService.addSig(newSig, 1);
+            apiSigService.addSig(newSig, 1);
 			return true;
 		}
 
@@ -419,4 +422,11 @@ public class DispatchMessageInterceptor extends HandlerInterceptorAdapter {
 		this.interfacePool = interfacePool;
 	}
 
+    public ApiSigService getApiSigService() {
+        return apiSigService;
+    }
+
+    public void setApiSigService(ApiSigService apiSigService) {
+        this.apiSigService = apiSigService;
+    }
 }

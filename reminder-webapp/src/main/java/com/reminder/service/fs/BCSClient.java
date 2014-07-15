@@ -17,20 +17,24 @@ import static com.reminder.constant.BaiduConstant.*;
 
 public class BCSClient {
 
-	public static String putObject(InputStream ios,long fileLength,String suffix){
+	public static String putObject(InputStream is,long fileLength,String suffix){
 		BCSCredentials credentials = new BCSCredentials(BAIDUBCS_ACCESS_KEY, BAIDUBCS_SECRET_KEY);
 		BaiduBCS baiduBCS = new BaiduBCS(credentials, BAIDUBCS_HOST);
 		baiduBCS.setDefaultEncoding("UTF-8"); // Default UTF-8
 		try {
 			ObjectMetadata objectMetadata = new ObjectMetadata();
-			objectMetadata.setContentType("image/jpeg");
+            if(suffix.equals("mp3")){
+                objectMetadata.setContentType("audio/mp3");
+            }else{
+			    objectMetadata.setContentType("image/jpeg");
+            }
+
 			objectMetadata.setContentLength(fileLength);
 			
 			String fileName=genFileName(suffix);
 		
-			PutObjectRequest request = new PutObjectRequest(BAIDUBCS_BUCKET, "/"+fileName, ios, objectMetadata);
+			PutObjectRequest request = new PutObjectRequest(BAIDUBCS_BUCKET, "/"+fileName, is, objectMetadata);
 			ObjectMetadata result = baiduBCS.putObject(request).getResult();
-			System.out.println(result.toString());
 			baiduBCS.putObjectPolicy(BAIDUBCS_BUCKET, "/"+fileName, X_BS_ACL.PublicRead);
 			return fileName;
 			
@@ -44,7 +48,7 @@ public class BCSClient {
 	}
 	
 	private static String genFileName(String suffix){
-		long randomnum=Math.round(Math.random() * 100);
+		long randomnum=Math.round(Math.random() * 1000);
 		return System.currentTimeMillis()+""+randomnum+"."+suffix;
 	}
 	
@@ -54,7 +58,7 @@ public class BCSClient {
 	
 	
 	public static void main(String[] args) throws FileNotFoundException {
-		File file=new File("/Users/renren/Downloads/20130909142945.jpg");
+		File file=new File("/Users/wills/Downloads/index.jpeg");
 		System.out.println(BCSClient.putObject(new FileInputStream(file),file.length(), "jpg"));
 	}
 }

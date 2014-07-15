@@ -3,6 +3,7 @@ package com.reminder.util;
 import java.io.UnsupportedEncodingException;
 
 public class MD5Util {
+
 	public static String MD5Encrypt(String input) {
 		if (input == null || input.trim().length() == 0) {
 			return null;

@@ -1,8 +1,7 @@
 package com.reminder.mcp.interceptor;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.reminder.mcp.model.ResponseModel;
-import com.reminder.util.log.JsonMapping;
+import com.reminder.util.JsonUtil;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -19,7 +18,6 @@ public class ResponseWriter {
 	
 	public static boolean writeToResponse(Object obj, HttpServletResponse response) {
 		
-		ObjectMapper mapper = JsonMapping.getMapper();
 		OutputStream out = null;
 		try {
 			out = response.getOutputStream();
@@ -30,9 +28,9 @@ public class ResponseWriter {
 				Map<String, String> map = new HashMap<String, String>();
 				map.put("name", e.name());
 				map.put("code", String.valueOf(e.ordinal()));
-				ret = mapper.writeValueAsString(map);
+				ret = JsonUtil.toJson(map);
 			}else{
-				ret = mapper.writeValueAsString(obj);
+				ret = JsonUtil.toJson(obj);
 			}
 			//logger.info("response write : "+ret);
 			byte[] bytes = ret.getBytes(Charset.forName("utf-8"));

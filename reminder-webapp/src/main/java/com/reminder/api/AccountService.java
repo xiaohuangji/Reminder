@@ -47,4 +47,14 @@ public interface AccountService {
      */
     @RestMethod
     public int changePassword(int _userId,String oldPassword,String newPassword);
+
+    /**
+     * 重置密码，通过短信验证码重置
+     * @param cellphone
+     * @param validationCode
+     * @param password
+     * @return
+     */
+    @RestMethod
+    public int resetPassword(String cellphone,String validationCode,String password);
 }

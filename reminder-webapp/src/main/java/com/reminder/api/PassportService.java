@@ -21,34 +21,18 @@ public interface PassportService {
 	  * @param userPassport
 	  * @return
 	  */
-	 public String createTicket(UserPassport userPassport);
-	 
-	 
+//	 public String createTicket(UserPassport userPassport);
+
 	 /**
 	  * 创建一个passport
-	  * @param userPassport
 	  * @return
 	  */
-	 public UserPassport createPassport(UserPassport userPassport);
+	 public UserPassport createPassport(int userId);
 	 
 	 /**
 	  * 
 	  * @param userId
 	  */
 	 public void removeTicket(int userId);
-	 
-	 /**
-	  * 
-	  * @param sig 获取sig对应的值
-	  * @return
-	  */
-	 public Integer getSig(String sig);
-	 
-	 /**
-	  * 设置sig的值
-	  * @param sig
-	  * @param value
-	  */
-	 public void addSig(String sig, Integer value);
 	  
 }

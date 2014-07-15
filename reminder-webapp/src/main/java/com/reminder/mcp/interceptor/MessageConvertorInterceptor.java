@@ -1,7 +1,6 @@
 package com.reminder.mcp.interceptor;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.reminder.util.log.JsonMapping;
+import com.reminder.util.JsonUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
@@ -93,14 +92,11 @@ public class MessageConvertorInterceptor  extends HandlerInterceptorAdapter{
 	private boolean jsonContentParser(HttpServletRequest request,
 			HttpServletResponse response){
 
-		ObjectMapper mapper = JsonMapping.getMapper();
 		InputStream inputStream = null;
 		try {
 			inputStream = request.getInputStream();
 			@SuppressWarnings("unchecked")
-			Map<String, String> paraMapper = mapper.readValue(inputStream,
-					Map.class);
-
+			Map<String, String> paraMapper = JsonUtil.jsonToMap(inputStream);
 			InterceptorUtil.setRequestParam(request, paraMapper);
 			return true;
 		} catch (IOException e) {

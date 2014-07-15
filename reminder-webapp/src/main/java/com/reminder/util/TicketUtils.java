@@ -1,4 +1,4 @@
-package com.reminder.mcp.passport;
+package com.reminder.util;
 
 import com.reminder.util.AzDGCrypt;
 import org.apache.commons.lang.StringUtils;

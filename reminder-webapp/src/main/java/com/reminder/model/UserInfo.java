@@ -12,9 +12,7 @@ public class UserInfo {
 
     private String name;
 
-    private String cellPhone;
-
-    private transient String password;
+    private String cellphone;
 
     private String avatar;
 
@@ -42,20 +40,13 @@ public class UserInfo {
         this.name = name;
     }
 
-    public String getCellPhone() {
-        return cellPhone;
+
+    public String getCellphone() {
+        return cellphone;
     }
 
-    public void setCellPhone(String cellPhone) {
-        this.cellPhone = cellPhone;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
+    public void setCellphone(String cellphone) {
+        this.cellphone = cellphone;
     }
 
     public String getAvatar() {

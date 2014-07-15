@@ -1,8 +1,9 @@
 package com.reminder.service.impl;
 
 import com.reminder.api.PassportService;
+import com.reminder.constant.RedisNSConstant;
 import com.reminder.model.UserPassport;
-import com.reminder.mcp.passport.TicketUtils;
+import com.reminder.util.TicketUtils;
 import com.reminder.redis.client.RedisClient;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
@@ -14,18 +15,13 @@ import java.util.UUID;
 @Component("passportService")
 public class PassportServiceImpl implements PassportService {
 
-    public static final String PASSPORT_PREFIX = "passport";
-
-    public static final String SIG_PREFIX = "sig";
-
-    private RedisClient passPortRedisClient=new RedisClient(PASSPORT_PREFIX);
-
-    private RedisClient sigRedisClient=new RedisClient(SIG_PREFIX);
+    private RedisClient passPortRedisClient=new RedisClient(RedisNSConstant.PASSPORT);
 
     public static final int EXPIRE = 86400*365;/**一年 **/
     
     public static final Logger logger = Logger.getLogger(PassportService.class);
 
+    @Override
 	public UserPassport getPassportByTicket(String ticket) {
 		UserPassport userPassport = null;
 		if (StringUtils.isEmpty(ticket)) {
@@ -39,18 +35,18 @@ public class PassportServiceImpl implements PassportService {
 		return userPassport;
 	}
 
-	public String createTicket(UserPassport userPassport) {
-		String ticket = null;
-		if (userPassport == null || userPassport.getUserId() == 0) {
-			return ticket;
-		}
-		ticket = TicketUtils.generateTicket(userPassport.getUserId());
-		userPassport.setTicket(ticket);
-		if (!StringUtils.isEmpty(ticket)) {
-            passPortRedisClient.setex(String.valueOf(userPassport.getUserId()), userPassport,EXPIRE);
-		}
-		return ticket;
-	}
+//	public String createTicket(UserPassport userPassport) {
+//		String ticket = null;
+//		if (userPassport == null || userPassport.getUserId() == 0) {
+//			return ticket;
+//		}
+//		ticket = TicketUtils.generateTicket(userPassport.getUserId());
+//		userPassport.setTicket(ticket);
+//		if (!StringUtils.isEmpty(ticket)) {
+//            passPortRedisClient.setex(String.valueOf(userPassport.getUserId()), userPassport,EXPIRE);
+//		}
+//		return ticket;
+//	}
 
 	@Override
 	public void removeTicket(int userId) {
@@ -58,26 +54,19 @@ public class PassportServiceImpl implements PassportService {
 	}
 
 	@Override
-	public Integer getSig(String sig) {
-        return sigRedisClient.get(sig,Integer.class);
-	}
-
-	@Override
-	public void addSig(String sig, Integer value) {
-        sigRedisClient.setex(sig, value, 5);
-
-    }
-
-	@Override
-	public UserPassport createPassport(UserPassport userPassport) {
+	public UserPassport createPassport(int userId) {
 		String ticket = null;
 		
-		if (userPassport == null || userPassport.getUserId() == 0) {
+		if (userId == 0) {
 			return null;
 		}
-		ticket = TicketUtils.generateTicket(userPassport.getUserId());
+		ticket = TicketUtils.generateTicket(userId);
+
+        UserPassport userPassport=new UserPassport();
+        userPassport.setUserId(userId);
 		userPassport.setTicket(ticket);
 		userPassport.setUserSecretKey(generateSecretKey());
+
 		if (!StringUtils.isEmpty(ticket)) {
             passPortRedisClient.setex(String.valueOf(userPassport.getUserId()), userPassport,EXPIRE);
 		}
@@ -89,7 +78,7 @@ public class PassportServiceImpl implements PassportService {
      * 
      * @return
      */
-    public static String generateSecretKey() {
+    private static String generateSecretKey() {
         UUID uuid = UUID.randomUUID();
         long now = System.currentTimeMillis();
         return DigestUtils.md5Hex(uuid.toString() + now);

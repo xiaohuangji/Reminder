@@ -2,7 +2,7 @@ package com.reminder.mcp.model;
 
 
 import com.reminder.mcp.annotation.RestMethod;
-import com.reminder.util.log.LoggerInformation;
+import com.reminder.mcp.log.LoggerInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

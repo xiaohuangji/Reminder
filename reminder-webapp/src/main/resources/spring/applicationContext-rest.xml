@@ -36,12 +36,10 @@
             <bean id="dispatchMessageInterceptor" class="com.reminder.mcp.interceptor.DispatchMessageInterceptor">
 			    <property name="interfacePool" ref="interfaceMethodPool"/>
 			    <property name="passportService" ref="passportService"/>
+                <property name="apiSigService" ref="apiSigService"/>
 		    </bean>
         </mvc:interceptor>
 	</mvc:interceptors>
-
-    <bean id="passportService" class="com.reminder.service.impl.PassportServiceImpl">
-    </bean>
 
     <context:component-scan base-package="com.reminder.service"/>
 </beans>
