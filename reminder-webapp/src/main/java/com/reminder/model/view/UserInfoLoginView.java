@@ -8,22 +8,22 @@ import com.reminder.model.UserPassport;
  */
 public class UserInfoLoginView {
 
-    private int code;
+    private int loginCode;
 
     private UserInfo userInfo;
 
     private UserPassport userPassport;
 
-    public UserInfoLoginView(int code) {
-        this.code = code;
+    public int getLoginCode() {
+        return loginCode;
     }
 
-    public int getCode() {
-        return code;
+    public void setLoginCode(int loginCode) {
+        this.loginCode = loginCode;
     }
 
-    public void setCode(int code) {
-        this.code = code;
+    public UserInfoLoginView(int loginCode) {
+        this.loginCode = loginCode;
     }
 
     public UserInfo getUserInfo() {

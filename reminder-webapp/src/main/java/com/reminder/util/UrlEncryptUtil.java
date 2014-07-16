@@ -1,7 +1,7 @@
 package com.reminder.util;
 
 
-import com.reminder.constant.ReminderConstant;
+import com.reminder.constant.BaseConstant;
 
 /**
  * Created by wills on 6/9/14.
@@ -14,7 +14,7 @@ public class UrlEncryptUtil {
      * @return
      */
     public static String encrypt(String url){
-        String azdg=  AzDGCrypt.encrypt(url, ReminderConstant.URLSECRETKEY);
+        String azdg=  AzDGCrypt.encrypt(url, BaseConstant.URLSECRETKEY);
         //将base64中的/转义成-
         return azdg.replace("/","-");
     }
@@ -27,7 +27,7 @@ public class UrlEncryptUtil {
     public static String decrypt(String secretUrl){
         //将-转化为/
         String  base64=secretUrl.replace("-","/");
-        return AzDGCrypt.decrypt(base64, ReminderConstant.URLSECRETKEY);
+        return AzDGCrypt.decrypt(base64, BaseConstant.URLSECRETKEY);
     }
 
 }

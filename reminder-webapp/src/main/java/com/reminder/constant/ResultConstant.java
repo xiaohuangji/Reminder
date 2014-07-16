@@ -25,5 +25,7 @@ public class ResultConstant {
     public static final int ACCOUNT_OLD_PWD_ERROR=1005;
 
     public static final int ACCOUNT_VALIDATION_EXPIRED=1006;
+
+    public static final int ACCOUNT_STATUS_FREEZE=1007;
     }
 

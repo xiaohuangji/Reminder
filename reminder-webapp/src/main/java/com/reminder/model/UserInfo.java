@@ -24,6 +24,8 @@ public class UserInfo {
 
     private Date updateTime;
 
+    private int status;
+
     public int getId() {
         return id;
     }
@@ -87,5 +89,13 @@ public class UserInfo {
 
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 }

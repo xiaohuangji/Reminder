@@ -36,8 +36,17 @@ public interface AccountService {
      */
     @RestMethod
     @NoTicket
-    public int sendValidationCode(String cellphone);
+    public int sendRegisterValidationCode(String cellphone);
 
+
+    /**
+     * 重置密码发送验证码
+     * @param cellphone
+     * @return
+     */
+    @RestMethod
+    @NoTicket
+    public int sendResetPwdValidationCode(String cellphone);
     /**
      * 修改密码
      * @param _userId

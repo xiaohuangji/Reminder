@@ -100,7 +100,7 @@ public class DispatchInterceptorConstant {
 	/**
 	 * request attribute 中的 params 属性的name
 	 */
-	public static final String REQUEST_PARAM_NAME = "com.dajie.message.mcp.params";
+	public static final String REQUEST_PARAM_NAME = "com.reminder.mcp.params";
 	
 	
 }

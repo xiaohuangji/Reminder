@@ -3,6 +3,7 @@ package com.reminder.service.impl;
 import com.reminder.api.AccountService;
 import com.reminder.api.PassportService;
 import com.reminder.api.UserService;
+import com.reminder.constant.AccountConstant;
 import com.reminder.constant.RedisNSConstant;
 import com.reminder.model.UserInfo;
 import com.reminder.model.view.UserInfoLoginView;
@@ -50,9 +51,14 @@ public class AccountServiceImpl implements AccountService {
     public UserInfoLoginView login(String cellphone, String password) {
 
         UserInfo userInfo=userService.getUserInfoByMobile(cellphone);
-        if(userInfo==null){
+        if(userInfo==null||userInfo.getStatus()==AccountConstant.STATUS_PRECREATE){
             LOGGER.warn("login error - account is not exist:"+cellphone);
             return new  UserInfoLoginView(ACCOUNT_NOT_EXISTED);
+        }
+
+        if(userInfo.getStatus()== AccountConstant.STATUS_FREEZE){
+            LOGGER.warn("login error - account is freeze:"+cellphone);
+            return new UserInfoLoginView(ACCOUNT_STATUS_FREEZE);
         }
 
         int userId=userInfo.getId();
@@ -75,10 +81,15 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public UserInfoLoginView register(String name, String cellphone, String password, String validationCode) {
 
-        //检查是否已注册过
-        if(!isMobileAvailable(cellphone)){
+        UserInfo userInfo=userService.getUserInfoByMobile(cellphone);
+
+        if(userInfo!=null&&userInfo.getStatus()==AccountConstant.STATUS_FREEZE){
+            return new UserInfoLoginView(ACCOUNT_STATUS_FREEZE);
+        }
+        if(userInfo!=null&&userInfo.getStatus()==AccountConstant.STATUS_NORMAL){
             return new UserInfoLoginView(ACCOUNT_MOBILE_HAS_USED);
         }
+
         //检查验证码
         //81828384--backdoor。如果验证码为此，成功进入下一步。
         String realValidationCode=validationRedisClient.get(cellphone, String.class);
@@ -92,14 +103,24 @@ public class AccountServiceImpl implements AccountService {
         //清除验证码
         validationRedisClient.del(cellphone);
 
-        //插入数据库
-        UserInfo userInfo=new UserInfo();
-        userInfo.setCellphone(cellphone);
-        userInfo.setName(name);
-        userInfo.setCreateTime(new Date());
+        int userId;
+        //如果未注册用户，重新插入，如果是预生成用户，更新
+        if(userInfo==null){
+            UserInfo newUserInfo=new UserInfo();
+            newUserInfo.setCellphone(cellphone);
+            newUserInfo.setName(name);
+            newUserInfo.setCreateTime(new Date());
+            newUserInfo.setStatus(AccountConstant.STATUS_NORMAL);
+            userInfoDAO.insertUserInfo(newUserInfo);
+            userId=newUserInfo.getId();
+        }else{
+            //更新
+            userId=userInfo.getId();
+            userInfoDAO.activeUser(name,userId,new Date());
+            LOGGER.info("active pre create user:"+userId);
 
-        userInfoDAO.insertUserInfo(userInfo);
-        int userId=userInfo.getId();
+        }
+
         userPwdDAO.changePwd(userId,md5Pwd(password, userId));
 
         UserInfoLoginView userInfoLoginView=new UserInfoLoginView(OP_SUCC);
@@ -112,25 +133,21 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public int sendValidationCode(String cellphone) {
+    public int sendRegisterValidationCode(String cellphone) {
 
+        UserInfo userInfo=userService.getUserInfoByMobile(cellphone);
         //判断如果已经是注册用户，返回错误
-        if(!isMobileAvailable(cellphone)){
-            LOGGER.warn("this mobile has registered :"+cellphone);
-            return ACCOUNT_MOBILE_HAS_USED;
-        }
+        if(userInfo!=null){
+            if(userInfo.getStatus()==AccountConstant.STATUS_NORMAL){
+                LOGGER.warn("this mobile has registered :"+cellphone);
+                return ACCOUNT_MOBILE_HAS_USED;
+            }else if(userInfo.getStatus()==AccountConstant.STATUS_FREEZE){
+                LOGGER.warn("this mobile has been freeze :"+cellphone);
+                return ACCOUNT_STATUS_FREEZE;
+            }
 
-        Random r = new Random();
-        int x = r.nextInt(9999);
-        validationRedisClient.setex(cellphone, x, E_VERIFYCODE);
-
-        if(SMSUtil.sendSM(cellphone,validationCodeStr+x)){
-            LOGGER.debug("gen verify code for mobile:" + cellphone + ":" + x);
-            return OP_SUCC;
-        }else{
-            LOGGER.warn("send verify code error:"+cellphone);
-            return OP_FAIL;
         }
+        return sendValidationCode(cellphone);
     }
 
     @Override
@@ -145,6 +162,23 @@ public class AccountServiceImpl implements AccountService {
             LOGGER.warn("oldpwd error,changepwd fail:"+_userId);
             return ACCOUNT_OLD_PWD_ERROR;
         }
+    }
+
+
+    @Override
+    public int sendResetPwdValidationCode(String cellphone) {
+
+        //判断如果已经是注册用户，返回错误
+        UserInfo userInfo=userService.getUserInfoByMobile(cellphone);
+        if(userInfo==null){//不存在
+            LOGGER.warn("this mobile is not existed :"+cellphone);
+            return ACCOUNT_NOT_EXISTED;
+        }
+        if(userInfo.getStatus()==AccountConstant.STATUS_FREEZE){
+            LOGGER.warn("this mobile has been freeze :"+cellphone);
+            return ACCOUNT_STATUS_FREEZE;
+        }
+        return sendValidationCode(cellphone);
     }
 
 
@@ -167,16 +201,22 @@ public class AccountServiceImpl implements AccountService {
         return OP_SUCC;
     }
 
-    /**
-     * 判断手机是否可用,即手机号未被注册说明可用
-     * @param cellphone
-     * @return
-     */
-    private boolean isMobileAvailable(String cellphone){
-        return userService.getUserInfoByMobile(cellphone)==null?true:false;
-    }
 
     private String md5Pwd(String password,int userId){
         return MD5Util.MD5Encrypt(password+userId);
+    }
+
+    private int sendValidationCode(String cellphone){
+        Random r = new Random();
+        int x = r.nextInt(9999);
+        validationRedisClient.setex(cellphone, x, E_VERIFYCODE);
+
+        if(SMSUtil.sendSM(cellphone,validationCodeStr+x)){
+            LOGGER.debug("gen verify code for mobile:" + cellphone + ":" + x);
+            return OP_SUCC;
+        }else{
+            LOGGER.warn("send verify code error:"+cellphone);
+            return OP_FAIL;
+        }
     }
 }
